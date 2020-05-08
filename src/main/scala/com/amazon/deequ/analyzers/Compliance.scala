@@ -53,4 +53,6 @@ case class Compliance(instance: String, predicate: String, where: Option[String]
   }
 
   override def filterCondition: Option[String] = where
+
+  override def name: AnalyzerName = AnalyzerName.Compliance(instance, predicate)
 }

@@ -73,6 +73,8 @@ object AnalyzerName {
   case class Entropy(column: String) extends AnalyzerName
   case class MinLength(column: String) extends AnalyzerName
   case class MaxLength(column: String) extends AnalyzerName
+  case class ApproxQuantiles(column: String) extends AnalyzerName
+  case class PatternMatch(column: String) extends AnalyzerName
 
   // Analyzers across 2 columns
   case class Correlation(column1: String, column2: String) extends AnalyzerName
@@ -96,7 +98,7 @@ object AnalyzerName {
 /** Common trait for all analyzers which generates metrics from states computed on data frames */
 trait Analyzer[S <: State[_], +M <: Metric[_]] {
 
-  def name: AnalyzerName = AnalyzerName.Size // TODO: Remove this and implement in sub-typed
+  def name: AnalyzerName
 
   /**
     * Compute the state (sufficient statistics) from the data

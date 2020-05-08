@@ -178,7 +178,7 @@ private[deequ] object AnalyzerContextSerializer extends JsonSerializer[AnalyzerC
     analyzerContext.metricMap.foreach { case (analyzer, metric) =>
       val entry = new JsonObject()
 
-      entry.add(ANALYZER_FIELD, context.serialize(analyzer, classOf[Analyzer[State[_], Metric[_]]]))
+      entry.add(ANALYZER_FIELD, context.serialize(analyzer, classOf[AnalyzerName]))
       entry.add(METRIC_FIELD, context.serialize(metric, classOf[Metric[_]]))
 
       metricMap.add(entry)

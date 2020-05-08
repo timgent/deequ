@@ -65,6 +65,12 @@ class MetricsRepositoryMultipleResultsLoaderTest extends WordSpec with Matchers
             ("Mutlicolumn", "att1,att2", "Uniqueness", 0.25, DATE_TWO, "NA"))
             .toDF("entity", "instance", "name", "value", "dataset_date", "region")
 
+          expected.show
+
+          analysisResultsAsDataFrame.show
+          val debug1 = expected.orderBy("entity", "instance", "name", "value", "dataset_date", "region").collect.toList
+          val debug2 = analysisResultsAsDataFrame.orderBy("entity", "instance", "name", "value", "dataset_date", "region").collect.toList
+
           assertSameRows(analysisResultsAsDataFrame, expected)
         }
     }
