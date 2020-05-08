@@ -16,7 +16,6 @@
 
 package com.amazon.deequ.analyzers
 
-import com.amazon.deequ.analyzers.AnalyzerName.AnalyzerName
 import com.amazon.deequ.analyzers.Analyzers._
 import com.amazon.deequ.metrics.{DoubleMetric, Entity, Metric}
 import org.apache.spark.sql.functions._
@@ -53,24 +52,51 @@ trait DoubleValuedState[S <: DoubleValuedState[S]] extends State[S] {
   def metricValue(): Double
 }
 
-/** Data type instances */
-object AnalyzerName extends Enumeration {
+sealed trait AnalyzerName
 
-  type AnalyzerName = Value
-  val Histogram, Size, DataType, ApproxCountDistinct, Completeness, Mean, StandardDeviation, Maximum, Minimum, Sum,
-  KLLSketch = Value
+object AnalyzerName {
+  // Analyzer Names with only one possible instance
+  case object Size extends AnalyzerName
+
+  // Analyzer names with a column parameter
+  case class KLLSketch(column: String) extends AnalyzerName
+  case class Histogram(column: String) extends AnalyzerName
+  case class DataType(column: String) extends AnalyzerName
+  case class ApproxCountDistinct(column: String) extends AnalyzerName
+  case class Completeness(column: String) extends AnalyzerName
+  case class Mean(column: String) extends AnalyzerName
+  case class StandardDeviation(column: String) extends AnalyzerName
+  case class Maximum(column: String) extends AnalyzerName
+  case class Minimum(column: String) extends AnalyzerName
+  case class Sum(column: String) extends AnalyzerName
+  case class ApproxQuantile(column: String) extends AnalyzerName
+  case class Entropy(column: String) extends AnalyzerName
+  case class MinLength(column: String) extends AnalyzerName
+  case class MaxLength(column: String) extends AnalyzerName
+
+  // Analyzers across 2 columns
+  case class Correlation(column1: String, column2: String) extends AnalyzerName
+
+  // Grouping Analyzer Names
+  case class Distinctness(columns: Seq[String]) extends AnalyzerName
+  case class MutualInformation(columns: Seq[String]) extends AnalyzerName
+  case class CountDistinct(columns: Seq[String]) extends AnalyzerName
+  case class Uniqueness(columns: Seq[String]) extends AnalyzerName
+  object Uniqueness {
+    def apply(column: String): Uniqueness = Uniqueness(Seq(column))
+  }
+  case class UniqueValueRatio(columns: Seq[String]) extends AnalyzerName
+
+  // Custom Analyzer Name to enable extensibility
+  case class CustomAnalyzerName[T](name: String, instance: T) extends AnalyzerName
+
+  case class Compliance(column: String, predicate: String) extends AnalyzerName
 }
-
-case class AnalyzerId(name: AnalyzerName, instance: String)
 
 /** Common trait for all analyzers which generates metrics from states computed on data frames */
 trait Analyzer[S <: State[_], +M <: Metric[_]] {
 
-  def id = AnalyzerId(name, instance)
-
-  def name: AnalyzerName = AnalyzerName.Histogram // TODO: Remove this and implement in sub-typed
-
-  def instance: String = "" // TODO: Remove this and implement in sub-typed
+  def name: AnalyzerName = AnalyzerName.Size // TODO: Remove this and implement in sub-typed
 
   /**
     * Compute the state (sufficient statistics) from the data

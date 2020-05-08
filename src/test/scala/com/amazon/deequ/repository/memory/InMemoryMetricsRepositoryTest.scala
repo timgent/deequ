@@ -59,9 +59,9 @@ class InMemoryMetricsRepositoryTest extends WordSpec with SparkContextSpec with 
 
     "save should ignore failed result metrics when saving" in withSparkSession { session =>
 
-      val metrics: Map[Analyzer[_, Metric[_]], Metric[_]] = Map(
-        Size() -> DoubleMetric(Entity.Column, "Size", "*", Success(5.0)),
-        Completeness("ColumnA") ->
+      val metrics: Map[AnalyzerName, Metric[_]] = Map(
+        AnalyzerName.Size -> DoubleMetric(Entity.Column, "Size", "*", Success(5.0)),
+        AnalyzerName.Completeness("ColumnA") ->
           DoubleMetric(Entity.Column, "Completeness", "ColumnA",
             Failure(new RuntimeException("error"))))
 
@@ -174,7 +174,7 @@ class InMemoryMetricsRepositoryTest extends WordSpec with SparkContextSpec with 
 
           val analysisResultsAsDataFrame = repository.load()
             .after(DATE_ONE)
-            .forAnalyzers(Seq(Completeness("att1"), Uniqueness(Seq("att1", "att2"))))
+            .forAnalyzers(Seq(AnalyzerName.Completeness("att1"), AnalyzerName.Uniqueness(Seq("att1", "att2"))))
             .getSuccessMetricsAsDataFrame(sparkSession)
 
           import sparkSession.implicits._

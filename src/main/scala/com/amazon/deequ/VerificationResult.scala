@@ -16,7 +16,7 @@
 
 package com.amazon.deequ
 
-import com.amazon.deequ.analyzers.{Analyzer, AnalyzerId}
+import com.amazon.deequ.analyzers.{Analyzer, AnalyzerName}
 import com.amazon.deequ.analyzers.runners.AnalyzerContext
 import com.amazon.deequ.checks.{Check, CheckResult, CheckStatus}
 import com.amazon.deequ.metrics.Metric
@@ -33,7 +33,7 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 case class VerificationResult(
     status: CheckStatus.Value,
     checkResults: Map[Check, CheckResult],
-    metrics: Map[AnalyzerId, Metric[_]])
+    metrics: Map[AnalyzerName, Metric[_]])
 
 object VerificationResult {
 

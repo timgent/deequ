@@ -208,9 +208,9 @@ private[deequ] object AnalyzerContextDeserializer extends JsonDeserializer[Analy
         val metric = context.deserialize(entry.getAsJsonObject.get(METRIC_FIELD),
           classOf[Metric[_]]).asInstanceOf[Metric[_]]
 
-        analyzer.id -> metric
+        analyzer.name -> metric
       }
-      .asInstanceOf[Seq[(AnalyzerId, Metric[_])]]
+      .asInstanceOf[Seq[(AnalyzerName, Metric[_])]]
       .toMap
 
     AnalyzerContext(metricMap)
