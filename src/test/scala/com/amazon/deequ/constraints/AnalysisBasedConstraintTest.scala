@@ -44,7 +44,7 @@ class AnalysisBasedConstraintTest extends WordSpec with Matchers with SparkConte
     * Sample analyzer that returns a 1.0 value if the given column exists and fails otherwise.
     */
   case class SampleAnalyzer(column: String) extends Analyzer[NumMatches, DoubleMetric] {
-    override def name: AnalyzerName = AnalyzerName.CustomAnalyzerName("sampleAnalyzer", column)
+    override def name: AnalyzerName = AnalyzerName.CustomAnalyzerName("SampleAnalyzer", column)
 
     override def toFailureMetric(exception: Exception): DoubleMetric = {
       DoubleMetric(Entity.Column, "sample", column, Failure(MetricCalculationException
@@ -132,7 +132,7 @@ class AnalysisBasedConstraintTest extends WordSpec with Matchers with SparkConte
       val emptyResults = Map.empty[AnalyzerName, Metric[_]]
       val validResults = Map[AnalyzerName, Metric[_]](
         AnalyzerName.CustomAnalyzerName("SampleAnalyzer", "att1") -> SampleAnalyzer("att1").calculate(df),
-        AnalyzerName.CustomAnalyzerName("SampleAnalyzer", "att1") -> SampleAnalyzer("someMissingColumn").calculate(df)
+        AnalyzerName.CustomAnalyzerName("SampleAnalyzer", "someMissingColumn") -> SampleAnalyzer("someMissingColumn").calculate(df)
       )
 
       // Analysis result should equal to 1.0 for an existing column

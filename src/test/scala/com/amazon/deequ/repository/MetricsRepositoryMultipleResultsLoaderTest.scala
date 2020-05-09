@@ -24,7 +24,7 @@ import org.scalatest.{Matchers, WordSpec}
 import com.amazon.deequ.analyzers._
 import com.amazon.deequ.analyzers.runners.AnalyzerContext
 import com.amazon.deequ.repository.memory.InMemoryMetricsRepository
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 
 class MetricsRepositoryMultipleResultsLoaderTest extends WordSpec with Matchers
   with SparkContextSpec with FixtureSupport {
@@ -64,12 +64,6 @@ class MetricsRepositoryMultipleResultsLoaderTest extends WordSpec with Matchers
             ("Column", "att1", "Completeness", 1.0, DATE_TWO, "NA"),
             ("Mutlicolumn", "att1,att2", "Uniqueness", 0.25, DATE_TWO, "NA"))
             .toDF("entity", "instance", "name", "value", "dataset_date", "region")
-
-          expected.show
-
-          analysisResultsAsDataFrame.show
-          val debug1 = expected.orderBy("entity", "instance", "name", "value", "dataset_date", "region").collect.toList
-          val debug2 = analysisResultsAsDataFrame.orderBy("entity", "instance", "name", "value", "dataset_date", "region").collect.toList
 
           assertSameRows(analysisResultsAsDataFrame, expected)
         }
@@ -264,8 +258,8 @@ class MetricsRepositoryMultipleResultsLoaderTest extends WordSpec with Matchers
     LocalDate.of(year, month, day).atTime(10, 10, 10).toEpochSecond(ZoneOffset.UTC)
   }
 
-  private[this] def assertSameRows(dataframeA: DataFrame, dataframeB: DataFrame): Unit = {
-    assert(dataframeA.collect().toSet == dataframeB.collect().toSet)
+  private[this] def assertSameRows(dataframeA: Dataset[_], dataframeB: Dataset[_]): Unit = {
+    assert(dataframeA.toDF.collect().toSet == dataframeB.toDF.collect().toSet)
   }
 
   private[this] def assertSameJson(jsonA: String, jsonB: String): Unit = {

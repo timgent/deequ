@@ -52,47 +52,90 @@ trait DoubleValuedState[S <: DoubleValuedState[S]] extends State[S] {
   def metricValue(): Double
 }
 
-sealed trait AnalyzerName
+sealed trait AnalyzerName {
+  def name: String = productPrefix
+  protected def productPrefix: String
+}
 
 object AnalyzerName {
+  sealed trait Filterable extends AnalyzerName {
+    def filterCondition: Option[String]
+  }
+  sealed trait SingleColumn extends AnalyzerName {
+    def column: String
+  }
+  sealed trait MultiColumn extends AnalyzerName {
+    def columns: Seq[String]
+  }
+  sealed trait Binned extends AnalyzerName {
+    def maxDetailBins: Int
+  }
+  sealed trait InstanceBased extends AnalyzerName {
+    def instance: String
+  }
+  sealed trait PredicateBased extends AnalyzerName {
+    def predicate: String
+  }
+  sealed trait PatternBased extends AnalyzerName {
+    def pattern: String
+  }
+  sealed trait TwoColumn extends AnalyzerName {
+    def column1: String
+    def column2: String
+  }
+  sealed trait Quantile extends AnalyzerName {
+    def quantile: Double
+    def relativeError: Double
+  }
+  sealed trait Quantiles extends AnalyzerName {
+    def quantiles: Seq[Double]
+    def relativeError: Double
+  }
+
   // Analyzer Names with only one possible instance
-  case object Size extends AnalyzerName
+  case class Size(filterCondition: Option[String]) extends Filterable
+
+  // Filterable analyzers with single column
+  case class MinLength(column: String, filterCondition: Option[String]) extends Filterable with SingleColumn
+  case class MaxLength(column: String, filterCondition: Option[String]) extends Filterable with SingleColumn
+  case class Maximum(column: String, filterCondition: Option[String]) extends Filterable with SingleColumn
+  case class Mean(column: String, filterCondition: Option[String]) extends Filterable with SingleColumn
+  case class Completeness(column: String, filterCondition: Option[String]) extends Filterable with SingleColumn
+  case class Entropy(column: String, filterCondition: Option[String]) extends Filterable with SingleColumn
+  case class ApproxCountDistinct(column: String, filterCondition: Option[String]) extends Filterable with SingleColumn
+  case class PatternMatch(column: String, filterCondition: Option[String], pattern: String) extends Filterable with SingleColumn with PatternBased
+  case class StandardDeviation(column: String, filterCondition: Option[String]) extends Filterable with SingleColumn
+  case class Histogram(column: String, filterCondition: Option[String], maxDetailBins: Int) extends Filterable with SingleColumn with Binned
+  case class DataType(column: String, filterCondition: Option[String]) extends Filterable with SingleColumn
+  case class Minimum(column: String, filterCondition: Option[String]) extends Filterable with SingleColumn
+  case class Sum(column: String, filterCondition: Option[String]) extends Filterable with SingleColumn
+  case class ApproxQuantile(column: String, filterCondition: Option[String], quantile: Double, relativeError: Double) extends Filterable with SingleColumn with Quantile
+
+  // Grouping analyzer names for filterable analyzers
+  case class UniqueValueRatio(columns: Seq[String], filterCondition: Option[String]) extends Filterable with MultiColumn
+  case class MutualInformation(columns: Seq[String], filterCondition: Option[String]) extends Filterable with MultiColumn
+  case class Distinctness(columns: Seq[String], filterCondition: Option[String]) extends Filterable with MultiColumn
+  case class Uniqueness(columns: Seq[String], filterCondition: Option[String]) extends Filterable with MultiColumn
+  object Uniqueness {
+    def apply(column: String, filterCondition: Option[String]): Uniqueness = Uniqueness(Seq(column), filterCondition)
+  }
+
+  // Analyzers across 2 columns that are filterable
+  case class Correlation(column1: String, column2: String, filterCondition: Option[String]) extends Filterable with TwoColumn
 
   // Analyzer names with a column parameter
   case class KLLSketch(column: String) extends AnalyzerName
-  case class Histogram(column: String) extends AnalyzerName
-  case class DataType(column: String) extends AnalyzerName
-  case class ApproxCountDistinct(column: String) extends AnalyzerName
-  case class Completeness(column: String) extends AnalyzerName
-  case class Mean(column: String) extends AnalyzerName
-  case class StandardDeviation(column: String) extends AnalyzerName
-  case class Maximum(column: String) extends AnalyzerName
-  case class Minimum(column: String) extends AnalyzerName
-  case class Sum(column: String) extends AnalyzerName
-  case class ApproxQuantile(column: String) extends AnalyzerName
-  case class Entropy(column: String) extends AnalyzerName
-  case class MinLength(column: String) extends AnalyzerName
-  case class MaxLength(column: String) extends AnalyzerName
-  case class ApproxQuantiles(column: String) extends AnalyzerName
-  case class PatternMatch(column: String) extends AnalyzerName
 
-  // Analyzers across 2 columns
-  case class Correlation(column1: String, column2: String) extends AnalyzerName
-
+  case class ApproxQuantiles(column: String, quantiles: Seq[Double], relativeError: Double) extends SingleColumn with Quantiles
   // Grouping Analyzer Names
-  case class Distinctness(columns: Seq[String]) extends AnalyzerName
-  case class MutualInformation(columns: Seq[String]) extends AnalyzerName
-  case class CountDistinct(columns: Seq[String]) extends AnalyzerName
-  case class Uniqueness(columns: Seq[String]) extends AnalyzerName
-  object Uniqueness {
-    def apply(column: String): Uniqueness = Uniqueness(Seq(column))
-  }
-  case class UniqueValueRatio(columns: Seq[String]) extends AnalyzerName
+  case class CountDistinct(columns: Seq[String]) extends MultiColumn
+
+  // Other Analyzer Names
+  case class Compliance(instance: String, filterCondition: Option[String], predicate: String) extends Filterable with InstanceBased with PredicateBased
 
   // Custom Analyzer Name to enable extensibility
-  case class CustomAnalyzerName[T](name: String, instance: T) extends AnalyzerName
+  case class CustomAnalyzerName[T](override val name: String, instance: T) extends AnalyzerName
 
-  case class Compliance(column: String, predicate: String) extends AnalyzerName
 }
 
 /** Common trait for all analyzers which generates metrics from states computed on data frames */

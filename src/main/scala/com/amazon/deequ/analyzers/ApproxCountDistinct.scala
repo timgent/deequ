@@ -65,5 +65,5 @@ case class ApproxCountDistinct(column: String, where: Option[String] = None)
 
   override def filterCondition: Option[String] = where
 
-  override def name: AnalyzerName = AnalyzerName.ApproxCountDistinct(column)
+  override def name: AnalyzerName = AnalyzerName.ApproxCountDistinct(column, filterCondition)
 }

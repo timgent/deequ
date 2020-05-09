@@ -85,7 +85,7 @@ private[examples] object AnomalyDetectionExample extends App {
       /* Lets have a look at the actual metrics. */
       metricsRepository
         .load()
-        .forAnalyzers(Seq(AnalyzerName.Size))
+        .forAnalyzers(Seq(AnalyzerName.Size(None)))
         .getSuccessMetricsAsDataFrame(session)
         .show()
     }

@@ -42,5 +42,5 @@ case class MaxLength(column: String, where: Option[String] = None)
 
   override def filterCondition: Option[String] = where
 
-  override def name: AnalyzerName = AnalyzerName.MaxLength(column)
+  override def name: AnalyzerName = AnalyzerName.MaxLength(column, filterCondition)
 }

@@ -106,13 +106,13 @@ class MetricsRepositoryAnomalyDetectionIntegrationTest extends WordSpec with Mat
      (1 to 30).foreach { pastDay =>
 
       val pastResultsEU = Map(
-        AnalyzerName.Size -> DoubleMetric(Entity.Dataset, "*", "Size", Success(math.floor(pastDay / 3))),
-        AnalyzerName.Mean("sales") -> DoubleMetric(Entity.Column, "sales", "Mean", Success(pastDay * 7))
+        AnalyzerName.Size(None) -> DoubleMetric(Entity.Dataset, "*", "Size", Success(math.floor(pastDay / 3))),
+        AnalyzerName.Mean("sales", None) -> DoubleMetric(Entity.Column, "sales", "Mean", Success(pastDay * 7))
       ).asInstanceOf[Map[AnalyzerName, Metric[_]]]
 
       val pastResultsNA = Map(
-        AnalyzerName.Size -> DoubleMetric(Entity.Dataset, "*", "Size", Success(pastDay)),
-        AnalyzerName.Mean("sales") -> DoubleMetric(Entity.Column, "sales", "Mean", Success(pastDay * 9))
+        AnalyzerName.Size(None) -> DoubleMetric(Entity.Dataset, "*", "Size", Success(pastDay)),
+        AnalyzerName.Mean("sales", None) -> DoubleMetric(Entity.Column, "sales", "Mean", Success(pastDay * 9))
       ).asInstanceOf[Map[AnalyzerName, Metric[_]]]
 
       val analyzerContextEU = new AnalyzerContext(pastResultsEU)

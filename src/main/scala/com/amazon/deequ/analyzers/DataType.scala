@@ -184,5 +184,5 @@ case class DataType(
 
   override def filterCondition: Option[String] = where
 
-  override def name: AnalyzerName = AnalyzerName.DataType(column)
+  override def name: AnalyzerName = AnalyzerName.DataType(column, filterCondition)
 }

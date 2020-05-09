@@ -74,5 +74,5 @@ case class StandardDeviation(column: String, where: Option[String] = None)
 
   override def filterCondition: Option[String] = where
 
-  override def name: AnalyzerName = AnalyzerName.StandardDeviation(column)
+  override def name: AnalyzerName = AnalyzerName.StandardDeviation(column, filterCondition)
 }

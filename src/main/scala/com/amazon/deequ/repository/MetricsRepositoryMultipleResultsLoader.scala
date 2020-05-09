@@ -19,7 +19,7 @@ package com.amazon.deequ.repository
 import com.amazon.deequ.analyzers.AnalyzerName
 import com.amazon.deequ.analyzers.runners.AnalyzerContext
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.{Column, DataFrame, SparkSession}
+import org.apache.spark.sql.{Column, DataFrame, Dataset, SparkSession}
 
 trait MetricsRepositoryMultipleResultsLoader {
 
@@ -61,6 +61,7 @@ trait MetricsRepositoryMultipleResultsLoader {
     */
   def getSuccessMetricsAsDataFrame(sparkSession: SparkSession, withTags: Seq[String] = Seq.empty)
   : DataFrame = {
+    import sparkSession.implicits.newProductEncoder
     val analysisResults = get()
 
     if (analysisResults.isEmpty) {
@@ -117,7 +118,7 @@ private[repository] object MetricsRepositoryMultipleResultsLoader {
     SimpleResultSerde.serialize(unioned)
   }
 
-  def dataFrameUnion(dataFrameOne: DataFrame, dataFrameTwo: DataFrame): DataFrame = {
+  def dataFrameUnion(dataFrameOne: Dataset[_], dataFrameTwo: Dataset[_]): DataFrame = {
 
     val columnsOne = dataFrameOne.columns.toSeq
     val columnsTwo = dataFrameTwo.columns.toSeq

@@ -33,55 +33,55 @@ class AnalysisResultSerdeTest extends FlatSpec with Matchers {
   "analysis results serialization with successful Values" should "work" in {
 
     val analyzerContextWithAllSuccValues = new AnalyzerContext(Map(
-      AnalyzerName.Size -> DoubleMetric(Entity.Column, "Size", "*", Success(5.0)),
-      AnalyzerName.Completeness("ColumnA") ->
+      AnalyzerName.Size(None) -> DoubleMetric(Entity.Column, "Size", "*", Success(5.0)),
+      AnalyzerName.Completeness("ColumnA", None) ->
         DoubleMetric(Entity.Column, "Completeness", "ColumnA", Success(5.0)),
-      AnalyzerName.Compliance("rule1", "att1 > 3") ->
+      AnalyzerName.Compliance("rule1", None, "att1 > 3") ->
         DoubleMetric(Entity.Column, "Completeness", "ColumnA", Success(5.0)),
-      AnalyzerName.ApproxCountDistinct("columnA") ->
+      AnalyzerName.ApproxCountDistinct("columnA", None) ->
         DoubleMetric(Entity.Column, "Completeness", "ColumnA", Success(5.0)),
       AnalyzerName.CountDistinct(Seq("columnA", "columnB")) ->
         DoubleMetric(Entity.Column, "Completeness", "ColumnA", Success(5.0)),
-      AnalyzerName.Distinctness(Seq("columnA", "columnB")) ->
+      AnalyzerName.Distinctness(Seq("columnA", "columnB"), None) ->
         DoubleMetric(Entity.Column, "Completeness", "ColumnA", Success(5.0)),
-      AnalyzerName.Correlation("firstColumn", "secondColumn") ->
+      AnalyzerName.Correlation("firstColumn", "secondColumn", None) ->
         DoubleMetric(Entity.Column, "Completeness", "ColumnA", Success(5.0)),
-      AnalyzerName.UniqueValueRatio(Seq("columnA", "columnB")) ->
+      AnalyzerName.UniqueValueRatio(Seq("columnA", "columnB"), None) ->
         DoubleMetric(Entity.Column, "Completeness", "ColumnA", Success(5.0)),
-      AnalyzerName.Correlation("firstColumn", "secondColumn") ->
+      AnalyzerName.Correlation("firstColumn", "secondColumn", None) ->
         DoubleMetric(Entity.Column, "Completeness", "ColumnA", Success(5.0)),
-      AnalyzerName.Uniqueness(Seq("ColumnA")) ->
+      AnalyzerName.Uniqueness(Seq("ColumnA"), None) ->
         DoubleMetric(Entity.Column, "Completeness", "ColumnA", Success(5.0)),
-      AnalyzerName.Uniqueness(Seq("ColumnA", "ColumnB")) ->
+      AnalyzerName.Uniqueness(Seq("ColumnA", "ColumnB"), None) ->
         DoubleMetric(Entity.Column, "Completeness", "ColumnA", Success(5.0)),
-      AnalyzerName.Histogram("ColumnA") ->
+      AnalyzerName.Histogram("ColumnA", None, Histogram.MaximumAllowedDetailBins) ->
         HistogramMetric("ColumnA", Success(Distribution(
           Map("some" -> DistributionValue(10, 0.5)), 10))),
-      AnalyzerName.Histogram ("ColumnA") ->
+      AnalyzerName.Histogram ("ColumnA", None, Histogram.MaximumAllowedDetailBins) ->
         HistogramMetric("ColumnA", Success(Distribution(
           Map("some" -> DistributionValue(10, 0.5), "other" -> DistributionValue(0, 0)), 10))),
-      AnalyzerName.Histogram("ColumnA") ->
+      AnalyzerName.Histogram("ColumnA", None, Histogram.MaximumAllowedDetailBins) ->
         HistogramMetric("ColumnA", Success(Distribution(
           Map("some" -> DistributionValue(10, 0.5)), 10))),
-      AnalyzerName.Entropy("ColumnA") ->
+      AnalyzerName.Entropy("ColumnA", None) ->
         DoubleMetric(Entity.Column, "Completeness", "ColumnA", Success(5.0)),
-      AnalyzerName.MutualInformation(Seq("ColumnA", "ColumnB")) ->
+      AnalyzerName.MutualInformation(Seq("ColumnA", "ColumnB"), None) ->
         DoubleMetric(Entity.Column, "Completeness", "ColumnA", Success(5.0)),
-      AnalyzerName.Minimum("ColumnA") ->
+      AnalyzerName.Minimum("ColumnA", None) ->
         DoubleMetric(Entity.Column, "Completeness", "ColumnA", Success(5.0)),
-      AnalyzerName.Maximum("ColumnA") ->
+      AnalyzerName.Maximum("ColumnA", None) ->
         DoubleMetric(Entity.Column, "Completeness", "ColumnA", Success(5.0)),
-      AnalyzerName.Mean("ColumnA") ->
+      AnalyzerName.Mean("ColumnA", None) ->
         DoubleMetric(Entity.Column, "Completeness", "ColumnA", Success(5.0)),
-      AnalyzerName.Sum("ColumnA") ->
+      AnalyzerName.Sum("ColumnA", None) ->
         DoubleMetric(Entity.Column, "Completeness", "ColumnA", Success(5.0)),
-      AnalyzerName.StandardDeviation("ColumnA") ->
+      AnalyzerName.StandardDeviation("ColumnA", None) ->
         DoubleMetric(Entity.Column, "Completeness", "ColumnA", Success(5.0)),
-      AnalyzerName.DataType("ColumnA") ->
+      AnalyzerName.DataType("ColumnA", None) ->
         DoubleMetric(Entity.Column, "Completeness", "ColumnA", Success(5.0)),
-      AnalyzerName.MinLength("ColumnA") ->
+      AnalyzerName.MinLength("ColumnA", None) ->
         DoubleMetric(Entity.Column, "MinLength", "ColumnA", Success(5.0)),
-      AnalyzerName.MaxLength("ColumnA") ->
+      AnalyzerName.MaxLength("ColumnA", None) ->
         DoubleMetric(Entity.Column, "MaxLength", "ColumnA", Success(5.0))
     ))
 
@@ -111,14 +111,14 @@ class AnalysisResultSerdeTest extends FlatSpec with Matchers {
     val clonedResult = deserialize(serialize(Seq(result))).head
 
     val (clonedAnalyzer, clonedMetric) = clonedResult.analyzerContext.metricMap
-      .collect { case (analyzer: PatternMatch, metric: DoubleMetric) =>
-        analyzer -> metric
+      .collect { case (analyzerName: AnalyzerName.PatternMatch, metric: DoubleMetric) =>
+        analyzerName -> metric
       }
       .head
 
     assert(analyzer.column == clonedAnalyzer.column)
     assert(analyzer.pattern.toString() == clonedAnalyzer.pattern.toString())
-    assert(analyzer.where == clonedAnalyzer.where)
+    assert(analyzer.where == clonedAnalyzer.filterCondition)
 
     assert(metric == clonedMetric)
   }
@@ -128,8 +128,8 @@ class AnalysisResultSerdeTest extends FlatSpec with Matchers {
 
     val analyzerContextWithMixedValues = new AnalyzerContext(
       Map(
-        AnalyzerName.Size -> DoubleMetric(Entity.Column, "Size", "*", Success(5.0)),
-        AnalyzerName.Completeness("ColumnA") ->
+        AnalyzerName.Size(None) -> DoubleMetric(Entity.Column, "Size", "*", Success(5.0)),
+        AnalyzerName.Completeness("ColumnA", None) ->
             DoubleMetric(Entity.Column, "Completeness", "ColumnA", Failure(sampleException))
       )
     )

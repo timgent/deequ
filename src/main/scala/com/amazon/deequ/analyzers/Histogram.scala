@@ -121,7 +121,7 @@ case class Histogram(
     }
   }
 
-  override def name: AnalyzerName = AnalyzerName.Histogram(column)
+  override def name: AnalyzerName = AnalyzerName.Histogram(column, filterCondition, maxDetailBins)
 }
 
 object Histogram {

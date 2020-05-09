@@ -61,7 +61,7 @@ case class PatternMatch(column: String, pattern: Regex, where: Option[String] = 
     hasColumn(column) :: isString(column) :: Nil
   }
 
-  override def name: AnalyzerName = AnalyzerName.PatternMatch(column)
+  override def name: AnalyzerName = AnalyzerName.PatternMatch(column, filterCondition, pattern.toString)
 }
 
 object Patterns {
